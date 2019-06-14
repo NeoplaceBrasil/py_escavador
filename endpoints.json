@@ -27,5 +27,20 @@
 			"method": "GET",
 			"authenticated": true
 		}
+	},
+	"Person": {
+		"find" : {
+			"base_url": "pessoas/{person}",
+			"method": "GET",
+			"authenticated": true,
+			"url_params": [
+				{
+					"id": "{person}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
+		}
 	}
 }
