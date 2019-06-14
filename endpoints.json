@@ -1,0 +1,31 @@
+{
+	"User": {
+		"token" : {
+			"base_url": "request-token",
+			"method": "POST",
+			"payload": [
+				{
+					"name": "username",
+					"type": "str",
+					"required": true 
+				},
+				{
+					"name": "password",
+					"type": "str",
+					"required": true 
+				},
+				{
+					"name": "callback",
+					"type": "str",
+					"required": false 
+				}
+			]
+		},
+
+		"credits" : {
+			"base_url": "quantidade-creditos",
+			"method": "GET",
+			"authenticated": true
+		}
+	}
+}
