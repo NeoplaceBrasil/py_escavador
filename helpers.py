@@ -6,7 +6,7 @@ def laod_json(filename):
     try:
         with open(filename) as f:
             return json.load(f)
-    except json.decoder.JSONDecodeError:
+    except (json.decoder.JSONDecodeError, FileNotFoundError):
         return dict()
 
 

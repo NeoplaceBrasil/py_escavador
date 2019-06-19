@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
 from enum import Enum, unique
-import helpers
-import settings
 import requests
 import inspect
+import helpers
+import settings
+import exceptions
 
 
 class Request():
-    def __init__(self, model, token=None):
-        self._data = self.getEndPoint(model, inspect.stack()[1][3])
+    def __init__(self, model, method, token=None):
+        self._data = self.getEndPoint(model, method)
         self._url = settings.API_URL + settings.API_VERSION + '/' + self._data.get('base_url')
         self._method = self._data.get('method')
         self._authenticated = self._data.get('authenticated')
         self._headers = settings.DEFAULT_REQUEST_HEADER
-        self._body_params = self._data.get('payload') or dict()
-        self._url_params = self._data.get('url_params') or dict()
+        self._body_params = self._data.get('body_params') or dict()
+        self._uri_params = self._data.get('uri_params') or dict()
         self._payload = dict()
         self._token = token
 
     def isAuthenticated(self):
         return self._authenticated
 
-    def send(self, bodyParams=None, urlParams=None):
+    def send(self, bodyParams=None, uriParams=None):
         #
         if bodyParams and len(bodyParams) and len(self._body_params):
             for arg in self._body_params:
@@ -32,12 +33,11 @@ class Request():
         if message:
             return message
 
-        #
-        if urlParams and len(self._url_params):
-            for param in self._url_params:
-                self._url = self._url.replace(param.get('id'), urlParams.get(param.get('name')))
+        if uriParams and len(self._uri_params):
+            for param in self._uri_params:
+                self._url = self._url.replace(param.get('id'), str(uriParams.get(param.get('name'))))
 
-        return self._doRequest()
+        return self._do_request()
 
     def getEndPoint(self, model, method):
         try:
@@ -65,61 +65,87 @@ class Request():
                 if param.__class__.__name__ != arg_type:
                     return "Parameter {0} should be {1}".format(arg_name, arg_type)
 
-    def _doRequest(self):
+    def _do_request(self):
         if self._token:
             self._headers['Authorization'] = 'Bearer {0}'.format(self._token)
 
-        response = requests.request(self._method, url=self._url, headers=self._headers, data=self._payload)
-        return response.json()
+        response = requests.request(self._method, url=self._url,
+                                    headers=self._headers, data=self._payload)
+        response = response.json()
+
+        if 'error' in response:
+            raise Exception('Error: {0}. {1}.'.format(response.get('error'),
+                                                      response.get('message')))
+
+        return response
 
 
 class User():
+    def __init__(self, token=None):
+        self._token = token
+        self._token_data = None
 
-    def token(self, username=None, password=None):
-        username = None if username is '' else username
-        password = None if username is '' else password
+    #@authtenticated
+    def save(self):
+        if not self._token:
+            raise exceptions.TokenNotFound()
 
-        if username is not None and password is not None:
-            data = Request(self).send(bodyParams={"username": username, "password": password})
-            helpers.write_json(settings.API_ACCESS_TOKEN, data)
+        helpers.write_json(settings.API_ACCESS_TOKEN, self._token_data)
 
-        data = helpers.laod_json(settings.API_ACCESS_TOKEN)
-        return data.get('access_token')
+    @property
+    def token(self):
+        if not self._token:
+            self._token = self.get_token()
+        return self._token
 
-    def credits(self, token=None):
-        if token is None:
-            token = self.token()
+    @property
+    def credits(self):
+        if not self._token:
+            raise exceptions.TokenNotFound()
 
-        response = Request(self, token).send()
+        response = Request(self, inspect.stack()[0][3], self._token).send()
         if 'quantidade_creditos' in response:
-            return response['quantidade_creditos']
+            return int(response['quantidade_creditos'])
 
         return response
+
+    def get_token(self, username=None, password=None):
+        if not username and not password:
+            self._token_data = helpers.laod_json(settings.API_ACCESS_TOKEN)
+        else:
+            self._token_data = Request(self, inspect.stack()[0][3]).send(bodyParams={'username': username, 'password': password})
+
+        if not self._token_data:
+            raise exceptions.TokenNotFound()
+        if self._token_data and 'access_token' not in self._token_data:
+            raise exceptions.InvalidTokenInformation()
+
+        self._token = self._token_data.get('access_token')
+        return self._token
 
 
 class Person():
-    #id
-    #lattes_id
-    #juridico_id
-    #usuario_id
-    #created_at
-    #ultimos_processos
-    #quantidade_processos
-    #estados_com_mais_processos
-    #link_api
     def __init__(self, token=None):
         self._token = token
-        #self._id
 
-    def authenticate(self, username=None, password=None):
-        self._token = User().token(username, password)
-        return self
-
+    #@authtenticated
     def find(self, id):
-        response = Request(self, self._token).send(urlParams={"id": id})
+        if not self._token:
+            raise exceptions.TokenNotFound()
 
-        return response
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": id})
 
+
+class Institution():
+    def __init__(self, token=None):
+        self._token = token
+
+    #@authtenticated
+    def find(self, id):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": id})
 
 @unique
 class TipoEntidade(Enum):

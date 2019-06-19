@@ -1,6 +1,6 @@
 import sys
 sys.path.append("..")
-from escavador import models
+from escavador import escavador
 import getpass
 
 
@@ -13,7 +13,7 @@ def main(argv):
         print("Person Id is required!")
         return 1
 
-    person = models.Person().authenticate(username=username, password=password).find(id=id)
+    person = escavador.authenticate(username, password).person.find(id)
     print(person)
 
 if __name__ == "__main__":

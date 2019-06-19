@@ -1,9 +1,9 @@
 {
 	"User": {
-		"token" : {
+		"get_token" : {
 			"base_url": "request-token",
 			"method": "POST",
-			"payload": [
+			"body_params": [
 				{
 					"name": "username",
 					"type": "str",
@@ -30,12 +30,27 @@
 	},
 	"Person": {
 		"find" : {
-			"base_url": "pessoas/{person}",
+			"base_url": "pessoas/{id}",
 			"method": "GET",
 			"authenticated": true,
-			"url_params": [
+			"uri_params": [
 				{
-					"id": "{person}",
+					"id": "{id}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
+		}
+	},
+	"Institution": {
+		"find" : {
+			"base_url": "instituicoes/{id}",
+			"method": "GET",
+			"authenticated": true,
+			"uri_params": [
+				{
+					"id": "{id}",
 					"name": "id",
 					"pattern": null,
 					"type": "int"
