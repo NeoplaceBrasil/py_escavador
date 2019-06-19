@@ -18,6 +18,10 @@ class Escavador:
         return models.Institution(self.user.token)
 
     @property
+    def lawsuit(self):
+        return models.Lawsuit(self.user.token)
+
+    @property
     def search(self):
         pass
 

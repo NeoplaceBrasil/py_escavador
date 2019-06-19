@@ -13,3 +13,7 @@ class InvalidTokenInformation(Exception):
 
 class TokenNotFound(Exception):
     pass
+
+
+class BadRequest(Exception):
+    pass

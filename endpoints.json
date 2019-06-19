@@ -41,11 +41,65 @@
 					"type": "int"
 				}
 			]
+		},
+		"lawsuits" : {
+			"base_url": "pessoas/{id}/processos",
+			"method": "GET",
+			"authenticated": true,
+			"uri_params": [
+				{
+					"id": "{id}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
 		}
 	},
 	"Institution": {
 		"find" : {
 			"base_url": "instituicoes/{id}",
+			"method": "GET",
+			"authenticated": true,
+			"uri_params": [
+				{
+					"id": "{id}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
+		},
+		"lawsuits" : {
+			"base_url": "instituicoes/{id}/processos",
+			"method": "GET",
+			"authenticated": true,
+			"uri_params": [
+				{
+					"id": "{id}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
+		}
+	},
+	"Lawsuit": {
+		"find" : {
+			"base_url": "processos/{id}",
+			"method": "GET",
+			"authenticated": true,
+			"uri_params": [
+				{
+					"id": "{id}",
+					"name": "id",
+					"pattern": null,
+					"type": "int"
+				}
+			]
+		},
+		"events" : {
+			"base_url": "processos/{id}/movimentacoes",
 			"method": "GET",
 			"authenticated": true,
 			"uri_params": [

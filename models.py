@@ -76,6 +76,8 @@ class Request():
         if 'error' in response:
             raise Exception('Error: {0}. {1}.'.format(response.get('error'),
                                                       response.get('message')))
+        elif response == "{'message': ''}":
+            raise exceptions.BadRequest()
 
         return response
 
@@ -129,11 +131,18 @@ class Person():
         self._token = token
 
     #@authtenticated
-    def find(self, id):
+    def find(self, key):
         if not self._token:
             raise exceptions.TokenNotFound()
 
-        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": id})
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
+
+    #@authtenticated
+    def lawsuits(self, key=None):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
 
 
 class Institution():
@@ -146,6 +155,33 @@ class Institution():
             raise exceptions.TokenNotFound()
 
         return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": id})
+
+    #@authtenticated
+    def lawsuits(self, key=None):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
+
+
+class Lawsuit():
+    def __init__(self, token=None):
+        self._token = token
+
+    #@authtenticated
+    def find(self, key):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
+
+    #@authtenticated
+    def events(self, key=None):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
+
 
 @unique
 class TipoEntidade(Enum):
