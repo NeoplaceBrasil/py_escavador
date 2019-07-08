@@ -21,3 +21,12 @@ def json2obj(data):
 
 def _json_object_hook(d):
     return namedtuple('X', d.keys())(*d.values())
+
+
+def convert(item):
+    try:
+        if item not in globals() and item not in locals():
+            return eval(item)
+
+    except NameError:
+        return item

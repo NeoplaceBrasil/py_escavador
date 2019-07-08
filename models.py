@@ -31,7 +31,7 @@ class Request():
                 if bodyParams.get(arg.get('name')) is not None:
                     self._payload.update({arg.get('name'): bodyParams.get(arg.get('name'))})
 
-        message = self._isValid()
+        message = self._isValid(queryParams=queryParams)
         if message:
             return message
 
@@ -41,8 +41,8 @@ class Request():
 
         if queryParams and self._query_params:
             request = requests.models.PreparedRequest()
-            request.prepare_url(self._url, self._query_params)
-            self._url = request.url
+            request.prepare_url(self._url, queryParams)
+            self._url = request.url.replace('%2C', ',')
 
         return self._do_request()
 
@@ -55,7 +55,7 @@ class Request():
         except KeyError as e:
             raise KeyError("[{0}] EndPoint to {1}.{2} doesn\'t exists in {3}".format(str(e), model_class, method, settings.END_POINTS_PATH))
 
-    def _isValid(self):
+    def _isValid(self, queryParams=None):
         if self._authenticated and not self._token:
             return "User not authenticated"
 
@@ -71,6 +71,29 @@ class Request():
             if not arg_required and param is not None:
                 if param.__class__.__name__ != arg_type:
                     return "Parameter {0} should be {1}".format(arg_name, arg_type)
+
+        if queryParams:
+            for arg in self._query_params:
+                arg_name = arg.get('name')
+                arg_type = arg.get('type')
+                arg_required = arg.get('required')
+
+                if arg_required and arg_name not in queryParams:
+                    return "Query parameter {0} is required".format(arg_name)
+                elif arg_name in queryParams:
+                    value = queryParams.get(arg_name)
+
+                    #type is an array?
+                    if "[]" in arg_type.replace(' ', ''):
+                        main_type = arg_type.replace(' ', '').replace('[]', '')
+                        values = value.split(',')
+
+                        for v in values:
+                            if main_type != "str":
+                                v = helpers.convert(v)
+
+                            if v.__class__.__name__.lower() != main_type:
+                                return "Query parameter {0} is not {1}".format(arg_name, arg_type)
 
     def _do_request(self):
         if self._token:
@@ -204,10 +227,7 @@ class Court():
         if not self._token:
             raise exceptions.TokenNotFound()
 
-        if keys and not isinstance(keys, list):
-            raise exceptions.BadRequest()
-
-        return Request(self, inspect.stack()[0][3], self._token).send(queryParams=keys)
+        return Request(self, inspect.stack()[0][3], self._token).send(queryParams={"ids": keys})
 
 
 @unique

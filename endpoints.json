@@ -119,8 +119,7 @@
 			"authenticated": true,
 			"query_params": [
 				{
-					"id": "id",
-					"name": "id",
+					"name": "ids",
 					"pattern": null,
 					"type": "int[]",
 					"required": false
