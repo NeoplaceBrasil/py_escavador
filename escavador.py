@@ -1,4 +1,3 @@
-import requests
 import models
 
 
@@ -22,6 +21,10 @@ class Escavador:
         return models.Lawsuit(self.user.token)
 
     @property
+    def court(self):
+        return models.Court(self.user.token)
+
+    @property
     def search(self):
         pass
 
@@ -30,7 +33,7 @@ class Escavador:
         return bool(self.user.token)
 
     def authenticate(self, username, password):
-        if not username or not password:
+        if (not self.is_authenticate) and (not username or not password):
             raise Exception("username and password are required.")
 
         self.user.get_token(username, password)

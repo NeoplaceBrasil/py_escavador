@@ -7,16 +7,13 @@ import getpass
 def main(argv):
     username = input('Username: ')
     password = getpass.getpass('Password: ')
-    id = input('Institution Id: ')
+    ids = input('Type monitoring ids (separated by commas. e.g. 1,2,3): ')
 
-    if id is None:
-        print("Institution Id is required!")
+    if ids and not ids.replace(',', '').isdigit():
+        print("Enter only integers separated by commas!")
         return 1
 
-    if username and password:
-        person = escavador.authenticate(username, password).institution.find(id)
-    else:
-        person = escavador.institution.find(id)
+    person = escavador.authenticate(username, password).court.all_monitoring(ids)
     print(person)
 
 if __name__ == "__main__":

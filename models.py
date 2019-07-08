@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from enum import Enum, unique
 import requests
+import json
 import inspect
 import helpers
 import settings
@@ -16,13 +17,14 @@ class Request():
         self._headers = settings.DEFAULT_REQUEST_HEADER
         self._body_params = self._data.get('body_params') or dict()
         self._uri_params = self._data.get('uri_params') or dict()
+        self._query_params = self._data.get('query_params') or dict()
         self._payload = dict()
         self._token = token
 
     def isAuthenticated(self):
         return self._authenticated
 
-    def send(self, bodyParams=None, uriParams=None):
+    def send(self, bodyParams=None, uriParams=None, queryParams=None):
         #
         if bodyParams and len(bodyParams) and len(self._body_params):
             for arg in self._body_params:
@@ -37,11 +39,16 @@ class Request():
             for param in self._uri_params:
                 self._url = self._url.replace(param.get('id'), str(uriParams.get(param.get('name'))))
 
+        if queryParams and self._query_params:
+            request = requests.models.PreparedRequest()
+            request.prepare_url(self._url, self._query_params)
+            self._url = request.url
+
         return self._do_request()
 
     def getEndPoint(self, model, method):
         try:
-            model_class = model.__class__.__name__
+            model_class = model.__class__.__name__.lower()
             data = helpers.laod_json(settings.END_POINTS_PATH)
 
             return data[model_class][method]
@@ -71,7 +78,11 @@ class Request():
 
         response = requests.request(self._method, url=self._url,
                                     headers=self._headers, data=self._payload)
-        response = response.json()
+        try:
+            response = response.json()
+        except json.decoder.JSONDecodeError:
+            raise Exception(response.text)
+
 
         if 'error' in response:
             raise Exception('Error: {0}. {1}.'.format(response.get('error'),
@@ -119,6 +130,7 @@ class User():
 
         if not self._token_data:
             raise exceptions.TokenNotFound()
+
         if self._token_data and 'access_token' not in self._token_data:
             raise exceptions.InvalidTokenInformation()
 
@@ -181,6 +193,21 @@ class Lawsuit():
             raise exceptions.TokenNotFound()
 
         return Request(self, inspect.stack()[0][3], self._token).send(uriParams={"id": key})
+
+
+class Court():
+    def __init__(self, token=None):
+        self._token = token
+
+    #@authtenticated
+    def all_monitoring(self, keys=None):
+        if not self._token:
+            raise exceptions.TokenNotFound()
+
+        if keys and not isinstance(keys, list):
+            raise exceptions.BadRequest()
+
+        return Request(self, inspect.stack()[0][3], self._token).send(queryParams=keys)
 
 
 @unique

@@ -1,5 +1,5 @@
 {
-	"User": {
+	"user": {
 		"get_token" : {
 			"base_url": "request-token",
 			"method": "POST",
@@ -28,7 +28,7 @@
 			"authenticated": true
 		}
 	},
-	"Person": {
+	"person": {
 		"find" : {
 			"base_url": "pessoas/{id}",
 			"method": "GET",
@@ -56,7 +56,7 @@
 			]
 		}
 	},
-	"Institution": {
+	"institution": {
 		"find" : {
 			"base_url": "instituicoes/{id}",
 			"method": "GET",
@@ -84,7 +84,7 @@
 			]
 		}
 	},
-	"Lawsuit": {
+	"lawsuit": {
 		"find" : {
 			"base_url": "processos/{id}",
 			"method": "GET",
@@ -111,5 +111,21 @@
 				}
 			]
 		}
+	},
+	"court": {
+		"all_monitoring": {
+			"base_url": "monitoramento-tribunal",
+			"method": "GET",
+			"authenticated": true,
+			"query_params": [
+				{
+					"id": "id",
+					"name": "id",
+					"pattern": null,
+					"type": "int[]",
+					"required": false
+				}
+			]
+		} 
 	}
 }
