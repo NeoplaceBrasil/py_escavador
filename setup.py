@@ -26,15 +26,16 @@ if sys.version_info[:2] == (2, 6):
     install_requires.append("unittest2")
 
 setup(
-    name="escavador",
+    name="py_escavador",
     description="Python client for Escavador",
     license="GLP 3.0",
     url="https://github.com/escavador/py_escavador",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     version=__versionstr__,
     author="Ícaro Jerry",
     author_email="icarojerry@potelo.com.br",
-    packages=find_packages(where=".", exclude=("test_elasticsearch*",)),
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU General Public License",
